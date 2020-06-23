@@ -67,7 +67,6 @@ predTrain= DecisionTree.predict(X_train)
 print("Train set Accuracy: ", metrics.accuracy_score(y_train, predTrain))
 print("Test set Accuracy: ", metrics.accuracy_score(y_test, predTest))
 
-predict=DecisionTree.predict([[0,61,3,1,30,0,0,1,0,225,150,95,28.58,65,103]])
 
 #GUI START
 from tkinter import *
