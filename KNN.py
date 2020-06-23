@@ -7,53 +7,17 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn import metrics
 
 filename="C:\\Users\\win 10\\B.tech\\2nd Year\\HeartDiseasePrediction.csv"
-
 df=pd.read_csv(filename)
+df.drop(['currentSmoker'],axis=1,inplace=True)
+df.drop(['education'],axis=1,inplace=True)
+df.dropna(axis=0,inplace=True)
 
-print(df['education'].value_counts())
-avg_education = (df['education'].astype('float').mean(axis=0)).astype('float')
-df['education'].replace(np.nan, avg_education, inplace=True)
-
-df['education']=df['education'].astype(int)
-print(df['education'].value_counts())
-
-print(df['cigsPerDay'].value_counts())
-avg_cigsPerDay = (df['cigsPerDay'].astype('float').mean(axis=0)).astype('float')
-df['cigsPerDay'].replace(np.nan, avg_cigsPerDay, inplace=True)
-
-df['cigsPerDay']=df['cigsPerDay'].astype(int)
-print(df['BPMeds'].value_counts())
-
-avg_BPMeds = (df['BPMeds'].astype('float').mean(axis=0)).astype('float')
-df['BPMeds'].replace(np.nan, avg_BPMeds, inplace=True)
-
-df['BPMeds']=df['BPMeds'].astype(int)
-
-avg_totChol = (df['totChol'].astype('float').mean(axis=0)).astype('float')
-df['totChol'].replace(np.nan, avg_totChol, inplace=True)
-
-df['totChol']=df['totChol'].astype(int)
-
-avg_BMI = (df['BMI'].astype('float').mean(axis=0)).astype('float')
-df['BMI'].replace(np.nan, avg_BMI, inplace=True)
-
-avg_heartRate = (df['heartRate'].astype('float').mean(axis=0)).astype('float')
-df['heartRate'].replace(np.nan, avg_heartRate, inplace=True)
-df['heartRate']=df['heartRate'].astype(int)
-
-avg_glucose = (df['glucose'].astype('float').mean(axis=0)).astype('float')
-df['glucose'].replace(np.nan, avg_glucose, inplace=True)
-df['glucose']=df['glucose'].astype(int)
-
-print(df.describe())
-
-X = df[['male', 'age','education', 'currentSmoker', 'cigsPerDay', 'BPMeds', 'prevalentStroke', 'prevalentHyp','diabetes', 'totChol', 'sysBP','diaBP','BMI','heartRate','glucose']] .values  #.astype(float)
+X = df[['male', 'age','cigsPerDay', 'BPMeds', 'prevalentStroke', 'prevalentHyp','diabetes', 'totChol', 'sysBP','diaBP','BMI','heartRate','glucose']] .values  #.astype(float)
 X[0:5]
 
 y = df['TenYearCHD'].values
-y[0:5]
 
-X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.2, random_state=4)
+X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.2,random_state=6)
 print ('Train set:', X_train.shape,  y_train.shape)
 print ('Test set:', X_test.shape,  y_test.shape)
 
@@ -206,8 +170,11 @@ drop.grid(row=9,column=3,pady=10)
 #Predict
 def myclick():
     result=""
-    predict=neigh.predict([[sex_ans[sex.get()],age.get(),education_levels[education.get()],smoking_ans[smoking.get()],Cigratte.get(),Medicine_ans[Medicine.get()],
-                            Stroke_ans[Stroke.get()],Hyp_ans[Hyp.get()],Diabetes_ans[Diabetes.get()],totChol.get(),sysBP.get(),diaBP.get(),BMI.get(),heartrate.get(),glucose.get()]])
+    predict = LR.predict([np.asarray((sex_ans[sex.get()], age.get(), Cigratte.get(), Medicine_ans[Medicine.get()],
+                                      Stroke_ans[Stroke.get()], Hyp_ans[Hyp.get()], Diabetes_ans[Diabetes.get()],
+                                      totChol.get(),
+                                      sysBP.get(), diaBP.get(), BMI.get(), heartrate.get(), glucose.get()),
+                                     dtype='float64')])
     print(predict[0])
     if(predict[0]==0):
         result="Not Diseased"
