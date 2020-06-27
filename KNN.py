@@ -4,34 +4,52 @@ import csv
 import matplotlib.pylab as plt
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import StandardScaler
 from sklearn import metrics
 
+#Importing Data Set in df from HeartDiseasePrediction.csv
 filename="C:\\Users\\win 10\\B.tech\\2nd Year\\HeartDiseasePrediction.csv"
 df=pd.read_csv(filename)
+
+#According to Data Analysis, Droping Current Smoker and Education Column
 df.drop(['currentSmoker'],axis=1,inplace=True)
 df.drop(['education'],axis=1,inplace=True)
 df.dropna(axis=0,inplace=True)
 
-X = df[['male', 'age','cigsPerDay', 'BPMeds', 'prevalentStroke', 'prevalentHyp','diabetes', 'totChol', 'sysBP','diaBP','BMI','heartRate','glucose']] .values  #.astype(float)
+#Selecting Independent Factors for Determining Heart Disease
+X = df[['male', 'age','cigsPerDay', 'BPMeds', 'prevalentStroke', 'prevalentHyp','diabetes', 'totChol', 'sysBP','diaBP','BMI','heartRate','glucose']] .values
 X[0:5]
-
 y = df['TenYearCHD'].values
 
-X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.2,random_state=6)
+#Spilting Data Set
+#20% Dataset for Testing Purpose And 80% Dataset for Training Purpose.
+X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.2)
+
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
+#Printing the Shape of Training Dataset And Testing Dataset
 print ('Train set:', X_train.shape,  y_train.shape)
 print ('Test set:', X_test.shape,  y_test.shape)
 
 #KNN Algorithm
+'''
+   KNN Algorithm:
+   1. Determine parameter K= number of nearest neighbors
+   2. Calculate the distance between the query-instance and all the training samples.
+   3. Sort the distance and determine nearest neighbrs based on K-th minimum distance.
+   4. Use simple majority of the category of nearest neighbors as the prediction value 
+   of the query instance.
+'''
 k = 10
 #Train Model and Predict
 neigh = KNeighborsClassifier(n_neighbors = k).fit(X_train,y_train)
-neigh
 
 yhat = neigh.predict(X_test)
 print(yhat[0:5])
 
-print("Train set Accuracy: ", metrics.accuracy_score(y_train, neigh.predict(X_train)))
-print("Test set Accuracy: ", metrics.accuracy_score(y_test, yhat))
+print("Accuracy: ", metrics.accuracy_score(y_test, yhat))
 
 #GUI START
 from tkinter import *
@@ -56,12 +74,12 @@ age=Entry(root,textvariable=IntVar())
 age.grid(row=3,column=1,pady=10)
 
 #Sex
-Sex=Label(root,text="Sex",bg="#E8EDF4")
-Sex.grid(row=4,column=0,pady=10)
-sex=StringVar()
-sex.set("Male")
-sex_ans={"Male":1,"Female":0}
-drop=OptionMenu(root,sex,*sex_ans.keys())
+Gender=Label(root,text="Gender",bg="#E8EDF4")
+Gender.grid(row=4,column=0,pady=10)
+gender=StringVar()
+gender.set("Male")
+gender_ans={"Male":1,"Female":0}
+drop=OptionMenu(root,gender,*gender_ans.keys())
 drop.config(bg="#E8EDF4")
 drop.grid(row=4,column=1,pady=10)
 
@@ -130,7 +148,7 @@ totChol.grid(row=3,column=3,pady=10)
 #BMI
 BMI=Label(root,text="BMI",bg="#E8EDF4")
 BMI.grid(row=4,column=2,pady=10)
-BMI=Entry(root,textvariable=IntVar())
+BMI=Entry(root,textvariable=DoubleVar())
 BMI.grid(row=4,column=3,pady=10)
 
 #HeartRate
@@ -148,13 +166,13 @@ glucose.grid(row=6,column=3,pady=10)
 #SysBp
 sysBP=Label(root,text="Systolic B.P",bg="#E8EDF4")
 sysBP.grid(row=7,column=2,pady=10)
-sysBP=Entry(root,textvariable=IntVar())
+sysBP=Entry(root,textvariable=DoubleVar())
 sysBP.grid(row=7,column=3,pady=10)
 
 #DiaBp
 diaBP=Label(root,text="Diastolic B.P",bg="#E8EDF4")
 diaBP.grid(row=8,column=2,pady=10)
-diaBP=Entry(root,textvariable=IntVar())
+diaBP=Entry(root,textvariable=DoubleVar())
 diaBP.grid(row=8,column=3,pady=10)
 
 #Prevalent Hyp
@@ -170,7 +188,7 @@ drop.grid(row=9,column=3,pady=10)
 #Predict
 def myclick():
     result=""
-    predict = LR.predict([np.asarray((sex_ans[sex.get()], age.get(), Cigratte.get(), Medicine_ans[Medicine.get()],
+    predict = neigh.predict([np.asarray((gender_ans[gender.get()], age.get(), Cigratte.get(), Medicine_ans[Medicine.get()],
                                       Stroke_ans[Stroke.get()], Hyp_ans[Hyp.get()], Diabetes_ans[Diabetes.get()],
                                       totChol.get(),
                                       sysBP.get(), diaBP.get(), BMI.get(), heartrate.get(), glucose.get()),
@@ -178,9 +196,11 @@ def myclick():
     print(predict[0])
     if(predict[0]==0):
         result="Not Diseased"
+        output.config(text=result, foreground="green", font='times 20 bold italic')
     else:
         result="Diseased"
-    output.config(text=result)
+        output.config(text=result, foreground="red", font='times 20 bold italic')
+
 
 predict=Button(root,text="Predict",command=myclick)
 predict.config(height=2,width=20,bg="#CAD6E6")

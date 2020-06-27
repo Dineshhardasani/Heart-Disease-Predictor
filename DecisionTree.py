@@ -6,67 +6,49 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import metrics
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.preprocessing import StandardScaler
 
+#Importing Data Set in df from HeartDiseasePrediction.csv
 filename="C:\\Users\\win 10\\B.tech\\2nd Year\\HeartDiseasePrediction.csv"
 df=pd.read_csv(filename)
 
-print(df['education'].value_counts())
-avg_education = (df['education'].astype('float').mean(axis=0)).astype('float')
-df['education'].replace(np.nan, avg_education, inplace=True)
+#According to Data Analysis, Droping Current Smoker and Education Column
+df.drop(['currentSmoker'],axis=1,inplace=True)
+df.drop(['education'],axis=1,inplace=True)
+df.dropna(axis=0,inplace=True)
 
-df['education']=df['education'].astype(int)
-print(df['education'].value_counts())
-
-print(df['cigsPerDay'].value_counts())
-avg_cigsPerDay = (df['cigsPerDay'].astype('float').mean(axis=0)).astype('float')
-df['cigsPerDay'].replace(np.nan, avg_cigsPerDay, inplace=True)
-
-df['cigsPerDay']=df['cigsPerDay'].astype(int)
-print(df['BPMeds'].value_counts())
-
-avg_BPMeds = (df['BPMeds'].astype('float').mean(axis=0)).astype('float')
-df['BPMeds'].replace(np.nan, avg_BPMeds, inplace=True)
-
-df['BPMeds']=df['BPMeds'].astype(int)
-
-avg_totChol = (df['totChol'].astype('float').mean(axis=0)).astype('float')
-df['totChol'].replace(np.nan, avg_totChol, inplace=True)
-
-df['totChol']=df['totChol'].astype(int)
-
-avg_BMI = (df['BMI'].astype('float').mean(axis=0)).astype('float')
-df['BMI'].replace(np.nan, avg_BMI, inplace=True)
-
-avg_heartRate = (df['heartRate'].astype('float').mean(axis=0)).astype('float')
-df['heartRate'].replace(np.nan, avg_heartRate, inplace=True)
-df['heartRate']=df['heartRate'].astype(int)
-
-avg_glucose = (df['glucose'].astype('float').mean(axis=0)).astype('float')
-df['glucose'].replace(np.nan, avg_glucose, inplace=True)
-df['glucose']=df['glucose'].astype(int)
-
-print(df.describe())
-
-X = df[['male', 'age','education', 'currentSmoker', 'cigsPerDay', 'BPMeds', 'prevalentStroke', 'prevalentHyp','diabetes', 'totChol', 'sysBP','diaBP','BMI','heartRate','glucose']] .values  #.astype(float)
+#Selecting Independent Factors for Determining Heart Disease
+X = df[['male', 'age','cigsPerDay', 'BPMeds', 'prevalentStroke', 'prevalentHyp','diabetes', 'totChol', 'sysBP','diaBP','BMI','heartRate','glucose']] .values
 X[0:5]
-
 y = df['TenYearCHD'].values
-y[0:5]
 
-X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.2)
+#Spilting Data Set
+#20% Dataset for Testing Purpose And 80% Dataset for Training Purpose.
+X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.2,random_state=4)
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+#Printing the Shape of Training Dataset And Testing Dataset
 print ('Train set:', X_train.shape,  y_train.shape)
 print ('Test set:', X_test.shape,  y_test.shape)
 
 #Decision Tree Algorithm
+
+'''
+   Decision Tree Algorithm
+   1. Choose the attribute from  dataset.
+   2. Calculate the significance of attribute in spliting of data.
+   3. Split data base on the value of the best attribute.
+   4. Go to step 1.
+   Information Gain=(Entropy before split)-(weighted Entropy after split)
+'''
+
 DecisionTree = DecisionTreeClassifier(criterion="entropy", max_depth = 4)
 DecisionTree.fit(X_train,y_train)
 
 predTest = DecisionTree.predict(X_test)
-predTrain= DecisionTree.predict(X_train)
 
-print("Train set Accuracy: ", metrics.accuracy_score(y_train, predTrain))
 print("Test set Accuracy: ", metrics.accuracy_score(y_test, predTest))
-
 
 #GUI START
 from tkinter import *
@@ -90,13 +72,13 @@ Age.grid(row=3,column=0,pady=10)
 age=Entry(root,textvariable=IntVar())
 age.grid(row=3,column=1,pady=10)
 
-#Sex
-Sex=Label(root,text="Sex",bg="#E8EDF4")
-Sex.grid(row=4,column=0,pady=10)
-sex=StringVar()
-sex.set("Male")
-sex_ans={"Male":1,"Female":0}
-drop=OptionMenu(root,sex,*sex_ans.keys())
+#Gender
+Gender=Label(root,text="Gender",bg="#E8EDF4")
+Gender.grid(row=4,column=0,pady=10)
+gender=StringVar()
+gender.set("Male")
+gender_ans={"Male":1,"Female":0}
+drop=OptionMenu(root,gender,*gender_ans.keys())
 drop.config(bg="#E8EDF4")
 drop.grid(row=4,column=1,pady=10)
 
@@ -165,7 +147,7 @@ totChol.grid(row=3,column=3,pady=10)
 #BMI
 BMI=Label(root,text="BMI",bg="#E8EDF4")
 BMI.grid(row=4,column=2,pady=10)
-BMI=Entry(root,textvariable=IntVar())
+BMI=Entry(root,textvariable=DoubleVar())
 BMI.grid(row=4,column=3,pady=10)
 
 #HeartRate
@@ -183,13 +165,13 @@ glucose.grid(row=6,column=3,pady=10)
 #SysBp
 sysBP=Label(root,text="Systolic B.P",bg="#E8EDF4")
 sysBP.grid(row=7,column=2,pady=10)
-sysBP=Entry(root,textvariable=IntVar())
+sysBP=Entry(root,textvariable=DoubleVar())
 sysBP.grid(row=7,column=3,pady=10)
 
 #DiaBp
 diaBP=Label(root,text="Diastolic B.P",bg="#E8EDF4")
 diaBP.grid(row=8,column=2,pady=10)
-diaBP=Entry(root,textvariable=IntVar())
+diaBP=Entry(root,textvariable=DoubleVar())
 diaBP.grid(row=8,column=3,pady=10)
 
 #Prevalent Hyp
@@ -205,13 +187,17 @@ drop.grid(row=9,column=3,pady=10)
 #Predict
 def myclick():
     result=""
-    predict=DecisionTree.predict([[sex_ans[sex.get()],age.get(),education_levels[education.get()],smoking_ans[smoking.get()],Cigratte.get(),Medicine_ans[Medicine.get()],
-                            Stroke_ans[Stroke.get()],Hyp_ans[Hyp.get()],Diabetes_ans[Diabetes.get()],totChol.get(),sysBP.get(),diaBP.get(),BMI.get(),heartrate.get(),glucose.get()]])
+    predict = DecisionTree.predict([np.asarray((gender_ans[gender.get()], age.get(), Cigratte.get(), Medicine_ans[Medicine.get()],
+                                      Stroke_ans[Stroke.get()], Hyp_ans[Hyp.get()], Diabetes_ans[Diabetes.get()],totChol.get(),
+                                      sysBP.get(), diaBP.get(), BMI.get(), heartrate.get(), glucose.get()),
+                                     dtype='float64')])
     print(predict)
     if(predict[0]==0):
         result="Not Diseased"
+        output.config(text=result, foreground="green", font='times 20 bold italic')
     else:
         result="Diseased"
+        output.config(text=result, foreground="red", font='times 20 bold italic')
     output.config(text=result)
 
 predict=Button(root,text="Predict",command=myclick)

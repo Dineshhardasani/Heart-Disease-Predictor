@@ -1,3 +1,4 @@
+#Import libraries
 import pandas as pd
 import numpy as np
 import csv
@@ -5,37 +6,56 @@ import matplotlib.pylab as plt
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import metrics
+from sklearn.metrics import confusion_matrix
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from tkinter import *
 
-
+#Importing Data Set in df from HeartDiseasePrediction.csv
 filename="C:\\Users\\win 10\\B.tech\\2nd Year\\HeartDiseasePrediction.csv"
 df=pd.read_csv(filename)
+
+#According to Data Analysis, Droping Current Smoker and Education Column
 df.drop(['currentSmoker'],axis=1,inplace=True)
 df.drop(['education'],axis=1,inplace=True)
 df.dropna(axis=0,inplace=True)
 
-X = df[['male', 'age','cigsPerDay', 'BPMeds', 'prevalentStroke', 'prevalentHyp','diabetes', 'totChol', 'sysBP','diaBP','BMI','heartRate','glucose']] .values  #.astype(float)
+#Selecting Independent Factors for Determining Heart Disease
+X = df[['male', 'age','cigsPerDay', 'BPMeds', 'prevalentStroke', 'prevalentHyp','diabetes', 'totChol', 'sysBP','diaBP','BMI','heartRate','glucose']] .values
 X[0:5]
-
 y = df['TenYearCHD'].values
 
+#Spilting Data Set
+#20% Dataset for Testing Purpose And 80% Dataset for Training Purpose.
+sc = StandardScaler()
+
 X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.2,random_state=5)
+
+#Printing the Shape of Training Dataset And Testing Dataset
 print ('Train set:', X_train.shape,  y_train.shape)
 print ('Test set:', X_test.shape,  y_test.shape)
 
-#Logistic Algorithm
+#Applying Logistic Algorithm For Prediction
 LR = LogisticRegression(C=0.01,solver='liblinear').fit(X_train,y_train)
-
-predTrain=LR.predict(X_train)
+#Predict Testing Data
 predTest= LR.predict(X_test)
 
 #Accuracy of Logistic Regression
-print("Train set Accuracy: ",metrics.accuracy_score(y_train,predTrain))
 print("Test set Accuracy: ", metrics.accuracy_score(y_test, predTest))
 
-#GUI START
-from tkinter import *
+results=confusion_matrix(y_test,predTest)
+print(results)
+'''
+     y=1/(1+e^(-z))
+     where,
+      y is the output of logistic regression model for a particular example.
+      z = b + w1*x1 + w2*x2 + w3*x3 + w4*x4  ........ + wn*xn
+      The w values are the model's learned weights, and b is the bias.
+      The x values are the feature values for a particular example
+      z can also be represented like this z=log(y/(1-y))
+'''
+#START Making GUI
 root=Tk()
 root.configure(background='#E8EDF4')
 root.title("Heart Disease Prediction Using Machine Learning")
@@ -56,13 +76,13 @@ Age.grid(row=3,column=0,pady=10)
 age=Entry(root,textvariable=IntVar())
 age.grid(row=3,column=1,pady=10)
 
-#Sex
-Sex=Label(root,text="Sex",bg="#E8EDF4")
-Sex.grid(row=4,column=0,pady=10)
-sex=StringVar()
-sex.set("Male")
-sex_ans={"Male":1,"Female":0}
-drop=OptionMenu(root,sex,*sex_ans.keys())
+#Gender
+Gender=Label(root,text="Gender",bg="#E8EDF4")
+Gender.grid(row=4,column=0,pady=10)
+gender=StringVar()
+gender.set("Male")
+gender_ans={"Male":1,"Female":0}
+drop=OptionMenu(root,gender,*gender_ans.keys())
 drop.config(bg="#E8EDF4")
 drop.grid(row=4,column=1,pady=10)
 
@@ -155,7 +175,7 @@ sysBP.grid(row=7,column=3,pady=10)
 #DiaBp
 diaBP=Label(root,text="Diastolic B.P",bg="#E8EDF4")
 diaBP.grid(row=8,column=2,pady=10)
-diaBP=Entry(root,textvariable=IntVar())
+diaBP=Entry(root,textvariable=DoubleVar())
 diaBP.grid(row=8,column=3,pady=10)
 
 #Prevalent Hyp
@@ -168,24 +188,28 @@ drop=OptionMenu(root,Hyp,*Hyp_ans.keys())
 drop.config(bg="#E8EDF4")
 drop.grid(row=9,column=3,pady=10)
 
-#Predict
+#GUI Backend
+#Predicting Function
 def myclick():
     result=""
-    predict=LR.predict([np.asarray((sex_ans[sex.get()],age.get(),Cigratte.get(),Medicine_ans[Medicine.get()],
+    predict=LR.predict([np.asarray((gender_ans[gender.get()],age.get(),Cigratte.get(),Medicine_ans[Medicine.get()],
                             Stroke_ans[Stroke.get()],Hyp_ans[Hyp.get()],Diabetes_ans[Diabetes.get()],totChol.get(),
                                   sysBP.get(),diaBP.get(),BMI.get(),heartrate.get(),glucose.get()),dtype='float64')])
-    print(predict[0])
+    #Determing Diseased or Not Diseased
     if(predict[0]==0):
         result="Not Diseased"
+        output.config(text=result, foreground="green", font='times 20 bold italic')
     else:
         result="Diseased"
-    output.config(text=result)
+        output.config(text=result, foreground="red", font='times 20 bold italic')
+    #Set Output in output label
 
 predict=Button(root,text="Predict",command=myclick)
 predict.config(height=2,width=20,bg="#CAD6E6")
 predict.grid(row=10,column=1,pady=40,columnspan=2)
 
 output = Label(root, text="", bg="#E8EDF4")
+
 output.grid(row=11,column=1)
 
 root.resizable(width=False,height=False)
