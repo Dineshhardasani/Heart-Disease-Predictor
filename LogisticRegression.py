@@ -28,10 +28,11 @@ y = df['TenYearCHD'].values
 
 #Spilting Data Set
 #20% Dataset for Testing Purpose And 80% Dataset for Training Purpose.
-sc = StandardScaler()
 
 X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.2,random_state=5)
-
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
 #Printing the Shape of Training Dataset And Testing Dataset
 print ('Train set:', X_train.shape,  y_train.shape)
 print ('Test set:', X_test.shape,  y_test.shape)
